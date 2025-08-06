@@ -5,22 +5,71 @@ package cmd
 
 import (
 	"fmt"
+	"godo/internal/models"
+	"godo/internal/storage"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "godo",
-	Short: "超シンプルなタスク管理アプリ",
-
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	 Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Godo アプリが起動しました！")
-	 },
+	Short: "超シンプルタスク管理アプリ",
+	Run: func(cmd *cobra.Command, args []string) {
+		// 保存機能のテスト
+		testStorage()
+	},
 }
+func testStorage() {
+	fmt.Println("📄 Godo - タスク管理")
+	fmt.Println("保存機能をテストしています...")
+
+	// ストレージを初期化
+	storage := storage.NewTaskStorage()
+	fmt.Printf("保存場所: %s\n", storage.GetFilePath())
+
+	// 既存のタスクを読み込み
+	tasks, err := storage.LoadTasks()
+	if err != nil {
+		fmt.Printf("エラー: %v\n", err)
+		return
+	}
+
+	// TaskManagerを初期化
+	manager := models.NewTaskManager(tasks)
+
+	// サンプルタスクを追加（初回のみ）
+	if len(tasks) == 0 {
+		manager.AddTask("Go言語を学習する")
+		manager.AddTask("bubbleteaを理解する")
+		manager.AddTask("Cobraを覚える")
+		fmt.Println("サンプルタスクを追加しました")
+	}
+
+	// タスク一覧を表示
+	fmt.Println("\n現在のタスク:")
+	for _, task := range manager.GetTasks() {
+		status := "○"
+		if task.Completed {
+			status = "✓"
+		}
+		fmt.Printf("%s %s (ID: %d)\n", status, task.Title, task.ID)
+	}
+
+	// 統計を表示
+	completed, total := manager.GetStats()
+	fmt.Printf("\n統計: 完了 %d | 未完了 %d\n", completed, total-completed)
+
+	// ファイルに保存
+	if err := storage.SaveTasks(manager.GetTasks()); err != nil {
+		fmt.Printf("保存エラー: %v\n", err)
+		return
+	}
+
+	fmt.Println("✅ タスクをファイルに保存しました")
+} // testStorage関数の終了（これは必要）
+// rootCmd represents the base command when called without any subcommands
+
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -32,16 +81,5 @@ func Execute() {
 	}
 }
 
-func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.godo.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
 
 
