@@ -10,7 +10,7 @@ type Task struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-//新しいタスクは新しいタスクを作成する関数
+//　新しいタスクは新しいタスクを作成する関数
 func NewTask(id int, title string) *Task {
 	now := time.Now()
 	return &Task{
