@@ -5,8 +5,7 @@ package cmd
 
 import (
 	"fmt"
-	"godo/internal/models"
-	"godo/internal/storage"
+	"godo/internal/ui"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -15,59 +14,25 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "godo",
 	Short: "超シンプルタスク管理アプリ",
+	Long: `Godo - Go言語で作った超シンプルなタスク管理アプリ
+	
+bubbleteaを使ったターミナルUIで、直感的にタスク管理ができます。
+
+操作方法:
+  Enter     - タスクの完了/未完了を切り替え
+  n         - 新しいタスクを追加
+  e         - 選択したタスクを編集
+  d         - 選択したタスクを削除
+  ↑/↓ or j/k - タスクの選択を移動
+  q         - アプリケーションを終了`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// 保存機能のテスト
-		testStorage()
+		// TUIアプリケーションを開始
+		if err := ui.RunApp(); err != nil {
+			fmt.Printf("アプリケーション実行エラー: %v\n", err)
+			os.Exit(1)
+		}
 	},
 }
-func testStorage() {
-	fmt.Println("📄 Godo - タスク管理")
-	fmt.Println("保存機能をテストしています...")
-
-	// ストレージを初期化
-	storage := storage.NewTaskStorage()
-	fmt.Printf("保存場所: %s\n", storage.GetFilePath())
-
-	// 既存のタスクを読み込み
-	tasks, err := storage.LoadTasks()
-	if err != nil {
-		fmt.Printf("エラー: %v\n", err)
-		return
-	}
-
-	// TaskManagerを初期化
-	manager := models.NewTaskManager(tasks)
-
-	// サンプルタスクを追加（初回のみ）
-	if len(tasks) == 0 {
-		manager.AddTask("Go言語を学習する")
-		manager.AddTask("bubbleteaを理解する")
-		manager.AddTask("Cobraを覚える")
-		fmt.Println("サンプルタスクを追加しました")
-	}
-
-	// タスク一覧を表示
-	fmt.Println("\n現在のタスク:")
-	for _, task := range manager.GetTasks() {
-		status := "○"
-		if task.Completed {
-			status = "✓"
-		}
-		fmt.Printf("%s %s (ID: %d)\n", status, task.Title, task.ID)
-	}
-
-	// 統計を表示
-	completed, total := manager.GetStats()
-	fmt.Printf("\n統計: 完了 %d | 未完了 %d\n", completed, total-completed)
-
-	// ファイルに保存
-	if err := storage.SaveTasks(manager.GetTasks()); err != nil {
-		fmt.Printf("保存エラー: %v\n", err)
-		return
-	}
-
-	fmt.Println("✅ タスクをファイルに保存しました")
-} 
 
 func Execute() {
 	err := rootCmd.Execute()
@@ -76,6 +41,3 @@ func Execute() {
 		os.Exit(1)
 	}
 }
-
-
-
