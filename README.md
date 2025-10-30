@@ -1,2 +1,4 @@
-# todo
-todo app
+# GoとCobra・Bubbletea・Lipglossライブラリを利用したtodoアプリ
+
+Go言語初心者がbubbletea、Cobra、lipglossライブラリを学習するための教材として、
+必要最小限の機能を持つタスク管理アプリケーションを作成しました。
